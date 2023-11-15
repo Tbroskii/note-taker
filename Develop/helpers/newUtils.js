@@ -1,0 +1,35 @@
+const fs = require('fs');
+const util = require('util');
+
+// Promise version of fs.readFile
+const readFileAsync = util.promisify(fs.readFile);
+const writeFileAsync = util.promisify(fs.writeFile);
+
+const readFromFile = (file) => readFileAsync(file, 'utf8');
+/**
+ *  Function to write data to the JSON file given a destination and some content
+ *  @param {string} destination The file you want to write to.
+ *  @param {object} content The content you want to write to the file.
+ *  @returns {void} Nothing
+ */
+const writeToFile = (destination, content) =>
+  writeFileAsync(destination, JSON.stringify(content, null, 4))
+    .then(() => console.info(`\nData written to ${destination}`))
+    .catch((err) => console.error(err));
+/**
+ *  Function to read data from a given a file and append some content
+ *  @param {object} content The content you want to append to the file.
+ *  @param {string} file The path to the file you want to save to.
+ *  @returns {void} Nothing
+ */
+const readAndAppend = (content, file) => {
+  return readFromFile(file)
+    .then((data) => {
+      const parsedData = JSON.parse(data);
+      parsedData.push(content);
+      return writeToFile(file, parsedData);
+    })
+    .catch((err) => console.error(err));
+};
+
+module.exports = { readFromFile, writeToFile, readAndAppend };
